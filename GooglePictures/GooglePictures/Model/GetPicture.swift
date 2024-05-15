@@ -6,3 +6,11 @@
 //
 
 import Foundation
+
+struct GetPicture: Decodable {
+    let items: [Item]
+}
+
+struct Item: Decodable {
+    let link: String
+}
