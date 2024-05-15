@@ -16,29 +16,9 @@ class ItemCollectionViewCell: UICollectionViewCell {
         self.imageView.image = nil
     }
     
-    func configure(with urlString: String) {
-        guard let url = URL(string: urlString) else { return }
-        
-        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            guard let data = data, error == nil else { return }
-            
-            DispatchQueue.main.async {
-                let image = UIImage(data: data)
-                self?.imageView.image = image
-            }
-        }
-        .resume()
+    func configure(with picture: UIImage) {
+        imageView.image = picture
     }
-    
-//    var picture: Picture? {
-//        didSet {
-//            guard let image = picture?.name else { return }
-//            imageView.image = UIImage(named: image)
-//        }
-//    }
-//
-//
-//    func setupCell(picture: Picture) {
-//        self.imageView.image = picture.image
-//    }
 }
+  
+
