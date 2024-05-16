@@ -22,7 +22,6 @@
 
 /* Begin PBXFileReference section */
 		2C6619192BCAA46000CD859A /* ItemCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemCollectionViewCell.swift; sourceTree = "<group>"; };
-		2C97128F2BC96299005E36CB /* GooglePictures.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = GooglePictures.app; path = "/Users/ivan/Documents/GitHub/GooglePictures/GooglePictures/build/Debug-iphoneos/GooglePictures.app"; sourceTree = "<absolute>"; };
 		2C9712922BC96299005E36CB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2C9712942BC96299005E36CB /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		2C9712962BC96299005E36CB /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -31,6 +30,7 @@
 		2C97129E2BC9629B005E36CB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		2C9712A02BC9629B005E36CB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2CA5701F2BCBF6F300B076FA /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
+		2CC0D05B2BF6246C00892B5C /* GooglePictures.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = GooglePictures.app; path = "/Users/ivan/Documents/GitHub/GooglePictures/GooglePictures/build/Debug-iphoneos/GooglePictures.app"; sourceTree = "<absolute>"; };
 		2CDAE3BF2BE3B7FD002F7141 /* ApiHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiHelper.swift; sourceTree = "<group>"; };
 		2CDAE3C12BE3B8A3002F7141 /* ExtensionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionViewController.swift; sourceTree = "<group>"; };
 		2CE4AAC82BE2484100A00158 /* GetPicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetPicture.swift; sourceTree = "<group>"; };
@@ -114,7 +114,7 @@
 			);
 			name = GooglePictures;
 			productName = GooglePictures;
-			productReference = 2C97128F2BC96299005E36CB /* GooglePictures.app */;
+			productReference = 2CC0D05B2BF6246C00892B5C /* GooglePictures.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
