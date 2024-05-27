@@ -19,9 +19,9 @@ extension UIViewController {
     }
     
     func noInternetAlert() {
-            let alert = UIAlertController(title: "Warning", message: "The Internet is not available", preferredStyle: .alert)
-            let action = UIAlertAction(title: "Dismiss", style: .default, handler: nil)
-            alert.addAction(action)
-            present(alert, animated: true, completion: nil)
+        let alert = UIAlertController(title: "Warning", message: "The Internet is not available", preferredStyle: .alert)
+        let action = UIAlertAction(title: "Dismiss", style: .default, handler: nil)
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
     }
 }
