@@ -33,21 +33,6 @@ struct ApiHelper {
         guard let url = URL(string: imageLink) else {
             completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
             return }
-                       
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                print("Request error: \(error.localizedDescription)")
-                completion(.failure(error))
-                return
-        }
-            
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No Data", code: 0, userInfo: nil)))
-                return }
-            
-            completion(.success(data))
-        }
-            
-        task.resume()
+        makeUrlRequest(url: url, completion: completion)
     }
 }
