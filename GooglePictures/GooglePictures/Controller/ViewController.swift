@@ -14,6 +14,8 @@ class ViewController: UIViewController, UISearchBarDelegate {
     var searchText: String = ""
     var page = 1
     
+    var apiHelper = ApiHelper()
+    
     var items: [UIImage] = []
     
     @IBOutlet weak var collectionView: UICollectionView!
@@ -66,21 +68,18 @@ class ViewController: UIViewController, UISearchBarDelegate {
         
         guard let url = buildURL(withQuery: query, startElementOnPage: startElementOnPage) else { return }
         
-        let task = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            if let error = error {
+        apiHelper.makeUrlRequest(url: url) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.activityIndicator.stopAnimating()
+            }
+            
+            switch result {
+            case .success(let data):
+                self?.handleResponseData(data: data, query: query)
+            case .failure(let error):
                 self?.handleError(error, query: query)
-                return
             }
-            
-            guard let data = data else {
-                self?.handleError(nil, query: query)
-                return
-            }
-            
-            self?.handleResponseData(data: data, query: query)
         }
-        
-        task.resume()
     }
 
     private func buildURL(withQuery query: String, startElementOnPage: Int) -> URL? {
@@ -110,14 +109,21 @@ class ViewController: UIViewController, UISearchBarDelegate {
         do {
             let jsonResult = try JSONDecoder().decode(GetPicture.self, from: data)
             jsonResult.items.forEach { link in
-                guard let pictureUrl = URL(string: link.link) else { return }
-                URLSession.shared.dataTask(with: pictureUrl) { [weak self] data, _, error in
-                    guard let data = data, error == nil, let image = UIImage(data: data) else { return }
-                    DispatchQueue.main.async {
-                        self?.items.append(image)
-                        self?.collectionView.reloadData()
+                apiHelper.makePictureRequest(imageLink: link.link) { [weak self] result in
+                    switch result {
+                    case .success(let data):
+                        guard let image = UIImage(data: data) else { return }
+                        DispatchQueue.main.async {
+                            self?.items.append(image)
+                            self?.collectionView.reloadData()
+                        }
+                    case .failure(let error):
+                        DispatchQueue.main.async {
+                            self?.errorAlert(with: error, completion: {
+                            })
+                        }
                     }
-                }.resume()
+                }
             }
             
             DispatchQueue.main.async {
