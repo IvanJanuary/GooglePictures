@@ -12,7 +12,7 @@ class ViewController: UIViewController, UISearchBarDelegate {
     let searchBar = UISearchBar()
     var activityIndicator = UIActivityIndicatorView()
     var searchText: String = ""
-    var page = 1
+    var page = 0
     
     var apiHelper = ApiHelper()
     
@@ -22,6 +22,7 @@ class ViewController: UIViewController, UISearchBarDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         title = "Search"
         searchBar.delegate = self
         view.addSubview(searchBar)
@@ -30,18 +31,27 @@ class ViewController: UIViewController, UISearchBarDelegate {
         collectionView.delegate = self
         
         activityIndicator = UIActivityIndicatorView(style: .medium)
-        activityIndicator.frame = CGRect(x: 0, y: 0, width: 25, height: 25)
         self.view.addSubview(activityIndicator)
         
-        activityIndicatorConstraint()
+        setupConstraints()
     }
     
-    func activityIndicatorConstraint() {
+    func setupConstraints() {
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            searchBar.heightAnchor.constraint(equalToConstant: 50)
+        ])
+        
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        activityIndicator.widthAnchor.constraint(equalToConstant: 25).isActive = true
-        activityIndicator.heightAnchor.constraint(equalToConstant: 25).isActive = true
-        activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        activityIndicator.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50).isActive = true
+        NSLayoutConstraint.activate([
+            activityIndicator.widthAnchor.constraint(equalToConstant: 25),
+            activityIndicator.heightAnchor.constraint(equalToConstant: 25),
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50)
+        ])
     }
 
     
@@ -53,9 +63,10 @@ class ViewController: UIViewController, UISearchBarDelegate {
     // -----
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
-        guard let searchBarText = searchBar.text else { return }
-        page = 1
+        // Reset the page variable and clear items array when a new search is initiated.
+        guard let searchBarText = searchBar.text, !searchBarText.isEmpty else { return }
         searchText = searchBarText
+        page = 0                     
         items = []
         collectionView.reloadData()
         
@@ -65,19 +76,23 @@ class ViewController: UIViewController, UISearchBarDelegate {
     func fetchPicture(withQuery query: String) {
         self.activityIndicator.startAnimating()
         let startElementOnPage = (page * 10) + 1
+        print("Fetching page \(page + 1) starting at element \(startElementOnPage)")
         
-        guard let url = buildURL(withQuery: query, startElementOnPage: startElementOnPage) else { return }
+        guard let url = buildURL(withQuery: query, startElementOnPage: startElementOnPage) else {
+            self.activityIndicator.stopAnimating()
+            return
+        }
         
         apiHelper.makeUrlRequest(url: url) { [weak self] result in
             DispatchQueue.main.async {
                 self?.activityIndicator.stopAnimating()
-            }
-            
-            switch result {
-            case .success(let data):
-                self?.handleResponseData(data: data, query: query)
-            case .failure(let error):
-                self?.handleError(error, query: query)
+                
+                switch result {
+                case .success(let data):
+                    self?.handleResponseData(data: data, query: query)
+                case .failure(let error):
+                    self?.handleError(error, query: query)
+                }
             }
         }
     }
@@ -95,46 +110,39 @@ class ViewController: UIViewController, UISearchBarDelegate {
     
     private func handleError(_ error: Error?, query: String) {
         print(error?.localizedDescription ?? "Unknown error")
-        DispatchQueue.main.async { [weak self] in
-            if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
-                self?.activityIndicator.stopAnimating()
-                self?.noInternetAlert()
-            } else {
-                self?.fetchPicture(withQuery: query)
-            }
+        if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
+            self.activityIndicator.stopAnimating()    // ?????????
+            self.noInternetAlert()
+        } else {
+            self.fetchPicture(withQuery: query)
         }
     }
 
     private func handleResponseData(data: Data, query: String) {
         do {
             let jsonResult = try JSONDecoder().decode(GetPicture.self, from: data)
+            print("Received \(jsonResult.items.count) items from API")
             jsonResult.items.forEach { link in
-                apiHelper.makePictureRequest(imageLink: link.link) { [weak self] result in
-                    switch result {
-                    case .success(let data):
-                        guard let image = UIImage(data: data) else { return }
+                guard link.link.hasPrefix("https") else { return }
+                    apiHelper.makePictureRequest(imageLink: link.link) { [weak self] result in
                         DispatchQueue.main.async {
-                            self?.items.append(image)
-                            self?.collectionView.reloadData()
-                        }
-                    case .failure(let error):
-                        DispatchQueue.main.async {
-                            self?.errorAlert(with: error, completion: {
-                            })
+                            switch result {
+                            case .success(let data):
+                                guard let image = UIImage(data: data) else { return }
+                                self?.items.append(image)
+                                self?.collectionView.reloadData()
+                            case .failure(let error):
+                                self?.errorAlert(with: error)
+                            }
                         }
                     }
                 }
-            }
             
-            DispatchQueue.main.async {
-                self.activityIndicator.stopAnimating()
-            }
+            self.activityIndicator.stopAnimating()
         } catch {
-            DispatchQueue.main.async {
-                self.activityIndicator.stopAnimating()
-                self.errorAlert(with: error, completion: { [weak self] in
-                    self?.fetchPicture(withQuery: query)
-                })
+            self.activityIndicator.stopAnimating()
+            self.errorAlert(with: error) { [weak self] in
+                self?.fetchPicture(withQuery: query)
             }
         }
     }
@@ -152,10 +160,10 @@ extension ViewController: UICollectionViewDataSource, UICollectionViewDelegate {
         let imageUrlString = items[indexPath.item]
         cell.configure(with: imageUrlString)
         
-        if (indexPath.item + 1) % 10 == 0 && indexPath.item == items.count - 1 {
-        page += 1
-        fetchPicture(withQuery: searchText)
-            }
+        if indexPath.item == items.count - 1 {  // check if you scrolled to the end of items array but indexPath.item is still less then 10
+            page += 1
+            fetchPicture(withQuery: searchText)
+        }
         
         return cell
     }
