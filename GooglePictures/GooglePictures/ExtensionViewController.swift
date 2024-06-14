@@ -8,12 +8,12 @@
 import UIKit
 
 extension UIViewController {
-    func errorAlert(with error: Error, completion: @escaping () -> Void) {
+    func errorAlert(with error: Error, retryCompletion: (() -> Void)? = nil) {
         let alert = UIAlertController(title: "Error!", message: "Your error: \(error.localizedDescription)", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: { _ in
         }))
         alert.addAction(UIAlertAction(title: "Retry", style: .default, handler: { (_: UIAlertAction!) in
-            completion()
+            retryCompletion?()
         }))
         self.present(alert, animated: true, completion: nil)
     }
